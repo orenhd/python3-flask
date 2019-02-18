@@ -3,7 +3,7 @@ from mongoengine import Document, StringField, ListField
 import config
 
 
-class User(Document):
+class UserModel(Document):
 
     username = StringField(required=True)
     password = StringField(required=True)
