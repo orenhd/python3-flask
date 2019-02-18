@@ -48,4 +48,16 @@ def user_login():
 def user_get(username):
     requested_user = UserModel.objects(  # pylint: disable=no-member
         username=username).exclude('password').first()
-    return make_response(jsonify({'success': True, 'data': requested_user.to_json()}), 200)
+    logged_in_user = UserModel.objects(  # pylint: disable=no-member
+        username=get_jwt_identity()).exclude('password').first()
+    if requested_user and logged_in_user:
+        # Verify friendship
+        requested_user_id_str = str(requested_user.id)
+        is_friend = True if requested_user_id_str in logged_in_user['friends'] else False
+        return make_response(jsonify({'success': True, 'data': {'id': requested_user_id_str,
+                                                                'username': requested_user['username'],
+                                                                'friends': requested_user['friends'],
+                                                                'is_friend': is_friend}}),
+                             200)
+    else:
+        abort(400)
