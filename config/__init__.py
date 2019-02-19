@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 app = {
+    "development_mode": os.getenv("FLASK_ENV") == "development",
     "at_string": os.getenv("AT_STRING"),
     "jwt_life_span": 180
 }

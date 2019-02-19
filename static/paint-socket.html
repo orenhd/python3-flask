@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<title>Paint Socket</title>
+
+	<link rel="stylesheet" href="/static/paint-socket.css" type="text/css">
+	<link href="https://fonts.googleapis.com/css?family=Hind:600" rel="stylesheet" type="text/css">
+</head>
+
+<body>
+	<div id="paint_socket" class="snippet-container">
+		<div id="ps_title" class="snippet_title">
+			<p class="ps_title-line">You are connected to Paint Socket!</p>
+			<p class="ps_title-line">Draw something for your fellow sketchers.</p>
+			<p class="ps_title-line">Each doodle lasts 30 seconds.</p>
+		</div>
+		<div id="ps_board" />
+		<div id="ps_background" />
+		<canvas id="ps_canvas" />
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.slim.js"></script>
+		<script>
+			window.PAINT_SOCKET_NAMESPACE="{{namespace}}"
+		</script>
+		<script src="/static/paint-socket.js"></script>
+</body>
+
+</html>

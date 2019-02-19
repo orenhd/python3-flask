@@ -1,17 +1,19 @@
-from flask import Flask, make_response, jsonify
+from flask import Flask, make_response, jsonify, render_template
 from werkzeug.exceptions import HTTPException
 from mongoengine import connect
 from flask_jwt_extended import JWTManager
+from flask_socketio import SocketIO
+
+from main import app, socketio
 
 import config
 
 from routes.user_routes import user_bp
 
+import socket_bindings.paint_socket_bindings as paint_socket
+
 # Init mongodb connection
 connect(host=config.databases['mongodb']['uri'])
-
-# Configure app
-app = Flask(__name__)
 
 # Setup the Flask-JWT-Extended extension
 app.config['JWT_SECRET_KEY'] = config.app['at_string']
@@ -19,6 +21,12 @@ app.config['JWT_ACCESS_TOKEN_EXPIRES'] = config.app['jwt_life_span']
 app.config['JWT_HEADER_NAME'] = 'x-access-token'
 app.config['JWT_HEADER_TYPE'] = ''
 jwt = JWTManager(app)
+
+# Register served static pages
+@app.route(paint_socket.namespace)
+def paint_socket_route():
+    return render_template('paint-socket.html', namespace=paint_socket.namespace)
+
 
 # Register App Blueprints
 app.register_blueprint(user_bp, url_prefix='/api/user')
@@ -38,4 +46,5 @@ def not_found(error):
 
 
 if __name__ == '__main__':
-    app.run()
+    socketio.run(app, debug=config.app['development_mode'],
+                 use_reloader=config.app['development_mode'])
