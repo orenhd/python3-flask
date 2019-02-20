@@ -1,63 +1,22 @@
-from flask import Blueprint, request, abort, make_response, jsonify
-from bcrypt import hashpw, gensalt, checkpw
-from flask_jwt_extended import jwt_required, create_access_token, get_jwt_identity
+from flask import Blueprint, request as req, abort, make_response as res
+from flask_jwt_extended import jwt_required
 
-from models.user_model import UserModel
+import controllers.user_controllers as user_controllers
 
-import consts.user_consts as user_consts
-
-SALT_WORK_FACTOR = 10
-
-user_bp = Blueprint('profile', __name__, url_prefix='/api/user')
+user_bp = Blueprint('user_bp', __name__)
 
 
 @user_bp.route('/signup', methods=['POST'])
 def user_signup():
-    if not request.json or not 'username' in request.json:
-        abort(400)
-    UserModel(
-        username=request.json['username'],
-        password=hashpw(request.json['password'].encode(
-            'UTF-8'), gensalt(SALT_WORK_FACTOR))
-    ).save()
-    return make_response(jsonify({'success': True}), 200)
+    return user_controllers.user_signup_controller(req, res, abort)
 
 
 @user_bp.route('/login', methods=['POST'])
 def user_login():
-    if not request.json or not 'username' in request.json:
-        abort(400)
-    requested_user = UserModel.objects(  # pylint: disable=no-member
-        username=request.json['username']).first()
-    if not requested_user:
-        return make_response(jsonify({'success': True, 'msg': user_consts.AUTH_FAILED_USER_MSG}), 401)
-    if checkpw(request.json['password'].encode(
-            'UTF-8'),
-            requested_user['password'].encode(
-            'UTF-8')):
-
-        # Create access token based on the logged in username
-        access_token = create_access_token(identity=requested_user['username'])
-        return make_response(jsonify({'success': True, 'data': {'access_token': access_token}, 'msg': user_consts.AUTH_SUCCESS_MSG}), 200)
-    else:
-        return make_response(jsonify({'success': True, 'msg': user_consts.AUTH_FAILED_PASSWORD_MSG}), 401)
+    return user_controllers.user_login_controller(req, res, abort)
 
 
 @user_bp.route('/<username>')
 @jwt_required
 def user_get(username):
-    requested_user = UserModel.objects(  # pylint: disable=no-member
-        username=username).exclude('password').first()
-    logged_in_user = UserModel.objects(  # pylint: disable=no-member
-        username=get_jwt_identity()).exclude('password').first()
-    if requested_user and logged_in_user:
-        # Verify friendship
-        requested_user_id_str = str(requested_user.id)
-        is_friend = True if requested_user_id_str in logged_in_user['friends'] else False
-        return make_response(jsonify({'success': True, 'data': {'id': requested_user_id_str,
-                                                                'username': requested_user['username'],
-                                                                'friends': requested_user['friends'],
-                                                                'is_friend': is_friend}}),
-                             200)
-    else:
-        abort(400)
+    return user_controllers.user_get_controller(req, res, abort, username=username)
