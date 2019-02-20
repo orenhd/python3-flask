@@ -15,3 +15,7 @@ databases = {
         "usersCollection": "meadows"
     }
 }
+
+admin_user = {
+    "password": os.getenv("ADMIN_USER_PASSWORD")
+}
