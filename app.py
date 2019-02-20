@@ -12,14 +12,16 @@ from routes.user_routes import user_bp
 
 import socket_bindings.paint_socket_bindings as paint_socket
 
+import services.jwt_service as jwt_service
+
 # Init mongodb connection
 connect(host=config.databases['mongodb']['uri'])
 
 # Setup the Flask-JWT-Extended extension
 app.config['JWT_SECRET_KEY'] = config.app['at_string']
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = config.app['jwt_life_span']
-app.config['JWT_HEADER_NAME'] = 'x-access-token'
-app.config['JWT_HEADER_TYPE'] = ''
+app.config['JWT_HEADER_NAME'] = jwt_service.JWT_HEADER_NAME
+app.config['JWT_HEADER_TYPE'] = jwt_service.JWT_HEADER_TYPE
 jwt = JWTManager(app)
 
 # Register served static pages

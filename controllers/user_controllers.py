@@ -1,12 +1,13 @@
 import json
 from bcrypt import hashpw, gensalt, checkpw
-from jwt import encode as jwt_encode, decode as jwt_decode
 
 from models.user_model import UserModel
 
 import config
 
 import consts.user_consts as user_consts
+
+import services.jwt_service as jwt_service
 
 SALT_WORK_FACTOR = 10
 
@@ -39,8 +40,7 @@ def user_login_controller(req, res, abort):
 
         # Create access token based on the logged in username
         # Use jwt directly to maintain controller independent from app instance
-        access_token = jwt_encode(
-            {'identity': requested_user['username']}, config.app['at_string'], algorithm='HS256')
+        access_token = jwt_service.encode(requested_user['username'])
         resp = res(json.dumps({'success': True, 'data': {'access_token': access_token.decode(
             "utf-8")}, 'msg': user_consts.AUTH_SUCCESS_MSG}), 200)
     else:
@@ -54,10 +54,8 @@ def user_get_controller(req, res, abort, **kwargs):
     requested_user = UserModel.objects(  # pylint: disable=no-member
         username=kwargs.get('username')).exclude('password').first()
     # Use jwt directly to maintain controller independent from app instance
-    jwt_decoded = jwt_decode(req.headers.get(
-        'x-access-token'), config.app['at_string'], algorithms=['HS256'])
     logged_in_user = UserModel.objects(  # pylint: disable=no-member
-        username=jwt_decoded['identity']).exclude('password').first()
+        username=jwt_service.get_identity(req)).exclude('password').first()
     if requested_user and logged_in_user:
         # Verify friendship
         requested_user_id_str = str(requested_user.id)
