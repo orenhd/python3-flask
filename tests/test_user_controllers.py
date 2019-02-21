@@ -69,3 +69,24 @@ class UserControllersTestCase(TestCase):
         finally:
             res.assert_not_called()
             abort.assert_called_once_with(400)
+
+    def test_user_get(self):
+        req, res, abort = mocks_service.generate_controller_args_mocks(config.admin_user['username'])
+        user_controllers.user_get_controller(req, res, abort, username=config.admin_user['username'])
+        abort.assert_not_called()
+        res.assert_called_once()
+        res_body, res_status_code = mocks_service.get_parsed_res_call_args(
+            res.call_args)
+        self.assertEqual(res_body['success'], True)
+        self.assertEqual(res_body['data'].get('username'), config.admin_user['username'])
+        self.assertEqual(res_status_code, 200)
+    
+    def test_user_get_incorrect_username(self):
+        req, res, abort = mocks_service.generate_controller_args_mocks(config.admin_user['username'])
+        try:
+            user_controllers.user_get_controller(req, res, abort, username='username')
+        except:
+            pass
+        finally:
+            res.assert_not_called()
+            abort.assert_called_once_with(400)
