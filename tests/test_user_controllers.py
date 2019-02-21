@@ -1,13 +1,13 @@
 import json
 from unittest import TestCase
-from unittest.mock import Mock, MagicMock
 
 from mongoengine import connect
 
 import controllers.user_controllers as user_controllers
 
-import config
+import services.mocks_service as mocks_service
 
+import config
 
 class UserControllersTestCase(TestCase):
 
@@ -18,10 +18,8 @@ class UserControllersTestCase(TestCase):
         self.db_conn.close()
 
     def test_user_login(self):
-        req = Mock()
+        req, res, abort = mocks_service.generate_controller_args_mocks()
         req.json = {'username': 'admin', 'password': config.admin_user['password']}
-        abort = Mock()
-        res = MagicMock()
         user_controllers.user_login_controller(req, res, abort)
         abort.assert_not_called()
         res.assert_called_once()

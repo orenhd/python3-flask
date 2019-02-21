@@ -17,5 +17,6 @@ databases = {
 }
 
 admin_user = {
+    "username": os.getenv("ADMIN_USER_USERNAME"),
     "password": os.getenv("ADMIN_USER_PASSWORD")
 }
