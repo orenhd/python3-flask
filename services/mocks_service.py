@@ -1,6 +1,7 @@
 # mocks_service
-# - Exposes configured functions for generatings common-used Mock objects
+# - Exposes configured functions for generating and destructure common-used Mock objects
 
+import json
 from unittest.mock import Mock, MagicMock
 
 import services.jwt_service as jwt_service
@@ -21,3 +22,9 @@ def generate_controller_args_mocks(access_token_identity = None):
         }
 
     return (req, res, abort)
+
+def get_parsed_res_call_args(res_call_args):
+    args, kwargs = res_call_args # pylint: disable=unused-variable
+    res_body = json.loads(args[0])
+    res_status_code = args[1]
+    return (res_body, res_status_code)
